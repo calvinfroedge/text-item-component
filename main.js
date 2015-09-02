@@ -47,8 +47,8 @@
        */
       var updateBindings = function(){
         if(opts.bindTo){
-          opts.bindTo.css('font-family', textItem.font.family);
-          opts.bindTo.css('font-size', textItem.font.size);
+          if(textItem.font.family) opts.bindTo.css('font-family', textItem.font.family);
+          if(textItem.font.size) opts.bindTo.css('font-size', textItem.font.size);
           opts.bindTo.css('color', textItem.color);
           opts.bindTo.text(textItem.value);
         }
@@ -87,27 +87,25 @@
       /*
        * Create the font picker
        */
-      if(!opts.fontPicker){
-        throw new Error("Font picker must have opts provided!");
+      if(opts.fontPicker){
+        if(opts.fontPicker.length < 2) opts.fontPicker.push({});
+
+        if(!opts.fontPicker[1].attachTo) opts.fontPicker[1].attachTo = els.container;
+
+        var FontPicker = FP.apply(null, opts.fontPicker);
+
+        FontPicker.els.container.on('font:change', function(event, font){
+          textItem.font = font;
+          change();
+        });
+
+        textItem.font = {
+          family: opts.fontPicker[1].fontDefault || opts.fontPicker[0][0],
+          size: (opts.fontSize && opts.fontSize.default) ? opts.fontSize.default : 'inherit'
+        }
+
+        els.fontPicker = FontPicker.els.container;
       }
-
-      if(opts.fontPicker.length < 2) opts.fontPicker.push({});
-
-      if(!opts.fontPicker[1].attachTo) opts.fontPicker[1].attachTo = els.container;
-
-      var FontPicker = FP.apply(null, opts.fontPicker);
-
-      FontPicker.els.container.on('font:change', function(event, font){
-        textItem.font = font;
-        change();
-      });
-
-      textItem.font = {
-        family: opts.fontPicker[1].fontDefault || opts.fontPicker[0][0],
-        size: (opts.fontSize && opts.fontSize.default) ? opts.fontSize.default : 'inherit'
-      }
-
-      els.fontPicker = FontPicker.els.container;
 
       /*
        * Create the color picker
